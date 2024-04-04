@@ -1,6 +1,5 @@
-﻿using AutoMapper;
-using MediatR;
-using ResumeBuilder.Domain.Models;
+﻿using MediatR;
+using ResumeBuilder.Domain.Users;
 using ResumeBuilder.Infrastructure.Repositories.Users;
 
 namespace ResumeBuilder.Application.Users

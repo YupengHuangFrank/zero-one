@@ -1,5 +1,6 @@
-﻿using ResumeBuilder.Domain.Models;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using ResumeBuilder.Domain.Users;
 
 namespace ResumeBuilder.Infrastructure.Repositories.Users
 {
