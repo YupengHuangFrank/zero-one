@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Identity;
 using ResumeBuilder.Domain.Users;
 using ResumeBuilder.Infrastructure.Repositories.Users;
 
@@ -7,16 +8,19 @@ namespace ResumeBuilder.Application.Users
     public class CreateUser : IRequestHandler<CreateUserRequest, CreateUserResult>
     {
         private readonly IUserRepository _userRepository;
+        private readonly IPasswordHasher<string> _passwordHasher;
 
-        public CreateUser(IUserRepository userRepository)
+        public CreateUser(IUserRepository userRepository, IPasswordHasher<string> passwordHasher)
         {
             _userRepository = userRepository;
+            _passwordHasher = passwordHasher;
         }
 
         public Task<CreateUserResult> Handle(CreateUserRequest request, CancellationToken cancellationToken)
         {
             try
             {
+                request.User.Password = _passwordHasher.HashPassword(string.Empty, request.User.Password!);
                 _userRepository.CreateUser(request.User);
                 return Task.FromResult(new CreateUserResult());
             }
