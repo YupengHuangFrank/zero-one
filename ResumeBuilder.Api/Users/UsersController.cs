@@ -24,16 +24,22 @@ namespace ResumeBuilder.Api.Users
         [HttpPost(Name = "CreateUser")]
         public async Task<ActionResult> CreateUserAsync([FromBody] UserApi user)
         {
-            var domainUser = _autoMapper.Map<User>(user);
+            var domainUser = Map<UserApi, User>(user);
             var request = new CreateUserRequest(domainUser);
             var result = await _mediator.Send(request);
             return Created("Created", result);
         }
 
-        [HttpPost(Name = "AuthenticateUser")]
-        public ActionResult GetTokenAsync()
+        private TDest Map<TSrc, TDest>(TSrc source)
         {
-            return Ok("User");
+            try
+            {
+                return _autoMapper.Map<TDest>(source);
+            }
+            catch (AutoMapperMappingException ex)
+            {
+                throw ex.GetBaseException();
+            }
         }
     }
 }
