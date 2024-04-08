@@ -21,12 +21,15 @@ namespace ResumeBuilder.Api.Users
             _mediator = mediator;
         }
 
-        [HttpPost(Name = "CreateUser")]
-        public async Task<ActionResult> CreateUserAsync([FromBody] UserApi user)
+        [HttpPost("Register")]
+        public async Task<ActionResult> RegisterAsync([FromBody] UserApi user)
         {
             var domainUser = Map<UserApi, User>(user);
             var request = new CreateUserRequest(domainUser);
             var result = await _mediator.Send(request);
+            if (result.NumberOfUserCreated <= 0)
+                return BadRequest("User already exists");
+
             return Created("Created", result);
         }
 

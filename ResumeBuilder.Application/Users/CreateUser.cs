@@ -21,8 +21,8 @@ namespace ResumeBuilder.Application.Users
             try
             {
                 request.User.Password = _passwordHasher.HashPassword(string.Empty, request.User.Password!);
-                _userRepository.CreateUser(request.User);
-                return Task.FromResult(new CreateUserResult());
+                var result = _userRepository.CreateUser(request.User);
+                return Task.FromResult(new CreateUserResult(result));
             }
             catch (Exception e)
             {
@@ -43,6 +43,10 @@ namespace ResumeBuilder.Application.Users
 
     public class CreateUserResult
     {
-        
+        public int NumberOfUserCreated { get; }
+        public CreateUserResult(int numberOfUserCreated)
+        {
+            NumberOfUserCreated = numberOfUserCreated;
+        }
     }
 }
