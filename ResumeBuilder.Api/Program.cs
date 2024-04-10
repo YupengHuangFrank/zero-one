@@ -16,7 +16,7 @@ public class Program
 #if DEBUG
         builder = GetConfiguredBuilder(args);
 #else
-        var builder = WebApplication.CreateBuilder(args);
+        builder = WebApplication.CreateBuilder(args);
 #endif
         builder.Services.AddControllers();
         var config = builder.Configuration;
