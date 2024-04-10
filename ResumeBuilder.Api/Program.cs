@@ -5,18 +5,24 @@ using ResumeBuilder.Infrastructure;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
+using System.Configuration;
 
 [ExcludeFromCodeCoverage]
 public class Program
 {
     public static void Main(string[] args)
     {
-        var builder = GetConfiguredBuilder(args);
+        WebApplicationBuilder builder;
+#if DEBUG
+        builder = GetConfiguredBuilder(args);
+#else
+        var builder = WebApplication.CreateBuilder(args);
+#endif
         builder.Services.AddControllers();
         var config = builder.Configuration;
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(x => 
-            { 
+            .AddJwtBearer(x =>
+            {
                 x.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
                     ValidIssuer = config["JwtSettings:Issuer"],
