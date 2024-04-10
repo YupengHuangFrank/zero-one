@@ -42,11 +42,16 @@ public class Program
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
+        //if (app.Environment.IsDevelopment())
+        //{
+        //    app.UseSwagger();
+        //    app.UseSwaggerUI();
+        //}
+
+        // Swagger UI is currently enabled for non-dev environment for ease of testing
+        app.UseSwagger();
+
+        app.UseSwaggerUI();
 
         app.UseHttpsRedirection();
 
