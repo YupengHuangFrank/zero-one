@@ -23,14 +23,15 @@ namespace ResumeBuilder.Api.Authentication
 
         [HttpPost("token")]
         [SwaggerResponse(200, "The token was generated")]
-        [SwaggerResponse(401, "Email or password incorrect")]
+        [SwaggerResponse(400, "Email or password incorrect")]
         public async Task<IActionResult> GenerateTokenAsync([FromBody] TokenRequestApi tokenRequestApi)
         {
             var tokenRequest = Map<TokenRequestApi, TokenRequest>(tokenRequestApi);
             var request = new GetJwtTokenRequest(tokenRequest);
             var response = await _mediator.Send(request);
             if (string.IsNullOrEmpty(response.JwtToken))
-                return Unauthorized();
+                return BadRequest();
+
             return Ok(response);
         }
 
