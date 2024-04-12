@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using ResumeBuilder.Api.Authentication.Models;
 using ResumeBuilder.Application.Authentication;
 using ResumeBuilder.Domain.Authentication;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace ResumeBuilder.Api.Authentication
 {
@@ -21,6 +22,8 @@ namespace ResumeBuilder.Api.Authentication
         }
 
         [HttpPost("token")]
+        [SwaggerResponse(200, "The token was generated")]
+        [SwaggerResponse(401, "Email or password incorrect")]
         public async Task<IActionResult> GenerateTokenAsync([FromBody] TokenRequestApi tokenRequestApi)
         {
             var tokenRequest = Map<TokenRequestApi, TokenRequest>(tokenRequestApi);
