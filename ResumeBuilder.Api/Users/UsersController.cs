@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using ResumeBuilder.Api.Users.Models;
 using ResumeBuilder.Application.Users;
 using ResumeBuilder.Domain.Users;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace ResumeBuilder.Api.Users
 {
@@ -21,7 +22,9 @@ namespace ResumeBuilder.Api.Users
             _mediator = mediator;
         }
 
-        [HttpPost("Register")]
+        [HttpPost]
+        [SwaggerResponse(201, "The user was created")]
+        [SwaggerResponse(400, "The user already exists")]
         public async Task<ActionResult> RegisterAsync([FromBody] UserApi user)
         {
             var domainUser = Map<UserApi, User>(user);
