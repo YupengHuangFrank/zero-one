@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using ResumeBuilder.Api.Authentication.Models;
 using ResumeBuilder.Api.Users.Models;
 using ResumeBuilder.Application.Users;
 using ResumeBuilder.Domain.Users;
@@ -23,8 +24,8 @@ namespace ResumeBuilder.Api.Users
         }
 
         [HttpPost]
-        [SwaggerResponse(201, "The user was created")]
-        [SwaggerResponse(400, "The user already exists")]
+        [ProducesResponseType(typeof(string), 201)]
+        [ProducesResponseType(typeof(string), 401)]
         public async Task<ActionResult> RegisterAsync([FromBody] UserApi user)
         {
             var domainUser = Map<UserApi, User>(user);
@@ -33,7 +34,7 @@ namespace ResumeBuilder.Api.Users
             if (result.NumberOfUserCreated <= 0)
                 return BadRequest("User already exists");
 
-            return Created("Created", result);
+            return Created("User created", result);
         }
 
         private TDest Map<TSrc, TDest>(TSrc source)
