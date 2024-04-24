@@ -32,9 +32,9 @@ namespace ResumeBuilder.Api.Users
             var request = new CreateUserRequest(domainUser);
             var result = await _mediator.Send(request);
             if (result.NumberOfUserCreated <= 0)
-                return BadRequest("User already exists");
+                return BadRequest("User already exists.");
 
-            return Created("User created", result);
+            return Created("User created.", result);
         }
 
         private TDest Map<TSrc, TDest>(TSrc source)

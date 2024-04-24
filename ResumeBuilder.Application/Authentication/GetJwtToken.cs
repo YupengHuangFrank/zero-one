@@ -37,7 +37,7 @@ namespace ResumeBuilder.Application.Authentication
                 return Task.FromResult(new GetJwtTokenResponse(string.Empty));
             
             if (verificationResult.Equals(PasswordVerificationResult.SuccessRehashNeeded))
-                Console.WriteLine("Password needs to be rehashed");
+                Console.WriteLine("Password needs to be rehashed.");
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]!);

@@ -5,7 +5,9 @@ using ResumeBuilder.Infrastructure;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
-using System.Configuration;
+using MongoDB.Driver;
+using ResumeBuilder.Infrastructure.Repositories.Users.Models;
+using ResumeBuilder.Infrastructure.Repositories.Users;
 
 [ExcludeFromCodeCoverage]
 public class Program
@@ -23,7 +25,7 @@ public class Program
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(x =>
             {
-                x.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                x.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidIssuer = config["JwtSettings:Issuer"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:Key"]!)),
@@ -38,6 +40,7 @@ public class Program
         builder.Services.AddApplication(builder.Configuration);
         builder.Services.AddInfrastructure(builder.Configuration);
         builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        ConfigureMongoDb(builder.Services, config);
 
         var app = builder.Build();
 
@@ -69,5 +72,38 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         builder.Configuration.AddJsonFile($"appsettings.Development.json");
         return builder;
+    }
+
+    private static IMongoDatabase CreateMongoDatabase(string connectionString, IConfiguration config)
+    {
+        var client = new MongoClient(connectionString);
+        return client.GetDatabase(config["CareerVentureDatabaseSettings:DatabaseName"]);
+    }
+
+    private static void ConfigureMongoDb(IServiceCollection services, IConfiguration config)
+    {
+        var connectionString = config.GetConnectionString("AZURE_MONGODB_CONNECTIONSTRING");
+        if (connectionString == null)
+            throw new MongoConfigurationException("Database settings not found");
+
+        try
+        {
+            var db = CreateMongoDatabase(connectionString, config);
+            AddMongoDbRepository<UserRepository, UserInfra>(config["CareerVentureDatabaseSettings:UsersCollectionName"]!);
+
+            void AddMongoDbRepository<TRepository, TModel>(string collectionName)
+            {
+                services.AddSingleton(db.GetCollection<TModel>(collectionName));
+                services.AddSingleton(typeof(TRepository));
+            }
+        }
+        catch (ArgumentNullException ex)
+        {
+            throw new MongoConfigurationException("Database settings are invalid", ex);
+        }
+        catch (Exception ex)
+        {
+            throw new MongoConfigurationException("Error configuring MongoDB", ex);
+        }
     }
 }

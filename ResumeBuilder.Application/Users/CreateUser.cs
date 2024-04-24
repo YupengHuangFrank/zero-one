@@ -26,7 +26,7 @@ namespace ResumeBuilder.Application.Users
             }
             catch (Exception e)
             {
-                throw new Exception("Error creating user", e);
+                throw new Exception("Error creating user.", e);
             }
         }
     }

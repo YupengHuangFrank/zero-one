@@ -33,7 +33,7 @@ namespace ResumeBuilder.Api.Authentication
                 var errorResponse = new ErrorTokenResponseApi 
                 {
                     Error = "invalid_client",
-                    ErrorMessage = "Email or password incorrect"
+                    ErrorMessage = "Email or password incorrect."
                 };
                 return Unauthorized(errorResponse);
             }

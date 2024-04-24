@@ -16,13 +16,13 @@ namespace ResumeBuilder.Api.Users.Models
         {
             var validations = new List<ValidationResult>();
             if (string.IsNullOrWhiteSpace(Email))
-                validations.Add(new ValidationResult("Email in UserApi is null"));
+                validations.Add(new ValidationResult("Email in UserApi cannot be null."));
             else
                 if (!Regex.IsMatch(Email, "^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}$"))
-                    validations.Add(new ValidationResult($"Email in UserApi is not formatted correctly"));
+                    validations.Add(new ValidationResult($"Email in UserApi is invalid."));
 
             if (string.IsNullOrWhiteSpace(Password))
-                validations.Add(new ValidationResult("Password in UserApi is null"));
+                validations.Add(new ValidationResult("Password in UserApi cannot be null."));
             
             return validations;
         }
