@@ -1,25 +1,21 @@
 ﻿using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using ResumeBuilder.Api.Authentication.Models;
 using ResumeBuilder.Api.Users.Models;
 using ResumeBuilder.Application.Users;
 using ResumeBuilder.Domain.Users;
-using Swashbuckle.AspNetCore.Annotations;
 
 namespace ResumeBuilder.Api.Users
 {
     [ApiController]
     [Route("[controller]")]
-    public class UsersController : ControllerBase
+    public class UsersController : ResumeBuilderBaseController
     {
-        private readonly IMapper _autoMapper;
         private readonly IMediator _mediator;
 
-        public UsersController(IMapper autoMapper,
-            IMediator mediator) 
+        public UsersController(IMapper mapper,
+            IMediator mediator) : base (mapper) 
         { 
-            _autoMapper = autoMapper;
             _mediator = mediator;
         }
 
@@ -35,18 +31,6 @@ namespace ResumeBuilder.Api.Users
                 return BadRequest("User already exists.");
 
             return Created("User created.", result);
-        }
-
-        private TDest Map<TSrc, TDest>(TSrc source)
-        {
-            try
-            {
-                return _autoMapper.Map<TDest>(source);
-            }
-            catch (AutoMapperMappingException ex)
-            {
-                throw ex.GetBaseException();
-            }
         }
     }
 }

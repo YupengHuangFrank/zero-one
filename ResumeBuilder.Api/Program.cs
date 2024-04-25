@@ -8,6 +8,9 @@ using System.Text;
 using MongoDB.Driver;
 using ResumeBuilder.Infrastructure.Repositories.Users.Models;
 using ResumeBuilder.Infrastructure.Repositories.Users;
+using Microsoft.OpenApi.Models;
+using ResumeBuilder.Infrastructure.Repositories.Resumes;
+using ResumeBuilder.Infrastructure.Repositories.Resumes.Models;
 
 [ExcludeFromCodeCoverage]
 public class Program
@@ -31,12 +34,39 @@ public class Program
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:Key"]!)),
                     ValidateIssuer = true,
                     ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true
+                    ValidateIssuerSigningKey = true,
+                    ValidateAudience = false
                 };
             });
         builder.Services.AddAuthorization();
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(swagger =>
+            {
+                swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\"",
+                });
+                swagger.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
+            }
+        );
         builder.Services.AddApplication(builder.Configuration);
         builder.Services.AddInfrastructure(builder.Configuration);
         builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
@@ -90,6 +120,7 @@ public class Program
         {
             var db = CreateMongoDatabase(connectionString, config);
             AddMongoDbRepository<UserRepository, UserInfra>(config["CareerVentureDatabaseSettings:UsersCollectionName"]!);
+            AddMongoDbRepository<ResumeRepository, ResumeInfra>(config["CareerVentureDatabaseSettings:ResumesCollectionName"]!);
 
             void AddMongoDbRepository<TRepository, TModel>(string collectionName)
             {

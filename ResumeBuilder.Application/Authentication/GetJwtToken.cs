@@ -26,15 +26,18 @@ namespace ResumeBuilder.Application.Authentication
             _passwordHasher = passwordHasher;
         }
 
-        public Task<GetJwtTokenResponse> Handle(GetJwtTokenRequest request, CancellationToken cancellationToken)
+        public async Task<GetJwtTokenResponse> Handle(GetJwtTokenRequest request, CancellationToken cancellationToken)
         {
-            var hashedPassword = _userRepository.GetHashedPassword(request.TokenRequest.Email!);
-            if (string.IsNullOrWhiteSpace(hashedPassword))
-                return Task.FromResult(new GetJwtTokenResponse(string.Empty));
+            var user = await _userRepository.GetUser(request.TokenRequest.Email!);
+            if (user == null)
+                return new GetJwtTokenResponse(string.Empty);
 
-            var verificationResult = _passwordHasher.VerifyHashedPassword(string.Empty, hashedPassword, request.TokenRequest.Password!);
+            if (string.IsNullOrWhiteSpace(user.Password))
+                return new GetJwtTokenResponse(string.Empty);
+
+            var verificationResult = _passwordHasher.VerifyHashedPassword(string.Empty, user.Password, request.TokenRequest.Password!);
             if (verificationResult.Equals(PasswordVerificationResult.Failed))
-                return Task.FromResult(new GetJwtTokenResponse(string.Empty));
+                return new GetJwtTokenResponse(string.Empty);
             
             if (verificationResult.Equals(PasswordVerificationResult.SuccessRehashNeeded))
                 Console.WriteLine("Password needs to be rehashed.");
@@ -45,6 +48,7 @@ namespace ResumeBuilder.Application.Authentication
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Email, request.TokenRequest.Email!),
+                new Claim(JwtRegisteredClaimNames.Iss, _configuration["JwtSettings:Issuer"]!),
               };
 
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -56,8 +60,8 @@ namespace ResumeBuilder.Application.Authentication
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
-            var jwt = tokenHandler.WriteToken(token);
-            return Task.FromResult(new GetJwtTokenResponse(jwt));
+            var jwt = $"Bearer {tokenHandler.WriteToken(token)}";
+            return new GetJwtTokenResponse(jwt);
         }
     }
 

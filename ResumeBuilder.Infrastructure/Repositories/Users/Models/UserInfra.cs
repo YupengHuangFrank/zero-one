@@ -12,5 +12,6 @@ namespace ResumeBuilder.Infrastructure.Repositories.Users.Models
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Password { get; set; }
+        public IEnumerable<string> ResumeIds { get; set; } = new List<string>();
     }
 }

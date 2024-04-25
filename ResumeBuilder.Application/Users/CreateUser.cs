@@ -16,13 +16,13 @@ namespace ResumeBuilder.Application.Users
             _passwordHasher = passwordHasher;
         }
 
-        public Task<CreateUserResult> Handle(CreateUserRequest request, CancellationToken cancellationToken)
+        public async Task<CreateUserResult> Handle(CreateUserRequest request, CancellationToken cancellationToken)
         {
             try
             {
                 request.User.Password = _passwordHasher.HashPassword(string.Empty, request.User.Password!);
-                var result = _userRepository.CreateUser(request.User);
-                return Task.FromResult(new CreateUserResult(result));
+                var result = await _userRepository.CreateUser(request.User);
+                return new CreateUserResult(result);
             }
             catch (Exception e)
             {

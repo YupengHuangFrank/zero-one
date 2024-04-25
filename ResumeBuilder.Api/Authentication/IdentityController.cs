@@ -9,14 +9,12 @@ namespace ResumeBuilder.Api.Authentication
 {
     [ApiController]
     [Route("[controller]")]
-    public class IdentityController : ControllerBase
+    public class IdentityController : ResumeBuilderBaseController
     {
-        private readonly IMapper _autoMapper;
         private readonly IMediator _mediator;
 
-        public IdentityController(IMapper autoMapper, IMediator mediator)
+        public IdentityController(IMapper mapper, IMediator mediator) : base(mapper)
         {
-            _autoMapper = autoMapper;
             _mediator = mediator;
         }
 
@@ -45,18 +43,6 @@ namespace ResumeBuilder.Api.Authentication
                 ExpiresIn = "3600",
             };
             return Ok(tokenResponse);
-        }
-
-        private TDest Map<TSrc, TDest>(TSrc source)
-        {
-            try
-            {
-                return _autoMapper.Map<TDest>(source);
-            }
-            catch (AutoMapperMappingException ex)
-            {
-                throw ex.GetBaseException();
-            }
         }
     }
 }

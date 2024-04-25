@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using ResumeBuilder.Domain.Users;
 using ResumeBuilder.Infrastructure.Repositories.Users.Models;
@@ -9,8 +7,9 @@ namespace ResumeBuilder.Infrastructure.Repositories.Users
 {
     public interface IUserRepository
     {
-        int CreateUser(User user);
-        string GetHashedPassword(string email);
+        Task<int> CreateUser(User user);
+        Task<int> UpdateUser(User user);
+        Task<User?> GetUser(string email);
     }
 
     public class UserRepository : IUserRepository
@@ -24,20 +23,36 @@ namespace ResumeBuilder.Infrastructure.Repositories.Users
             _mapper = mapper;
         }
 
-        public int CreateUser(User user)
+        public async Task<int> CreateUser(User user)
         {
             var userInfra = _mapper.Map<UserInfra>(user);
             if (_userCollection.Find(x => x.Email == user.Email).Any())
                 return 0;
 
-            _userCollection.InsertOne(userInfra);
+            await _userCollection.InsertOneAsync(userInfra);
             return 1;
         }
 
-        public string GetHashedPassword(string email)
+        public async Task<int> UpdateUser(User user)
         {
-            var userInfra = _userCollection.Find(x => x.Email == email).FirstOrDefault();
-            return userInfra?.Password ?? "";
+            var userInfra = _mapper.Map<UserInfra>(user);
+            var result = await _userCollection.ReplaceOneAsync(x => x.Id == userInfra.Id, userInfra);
+            return result.IsAcknowledged ? 1 : 0;
+        }
+
+        public async Task<User?> GetUser(string email)
+        {
+            var userInfras = await _userCollection.FindAsync(x => x.Email == email);
+            var userInfra = userInfras.FirstOrDefault();
+            if (userInfra == null)
+                return null;
+
+            var user = new User(userInfra.Email!, userInfra.FirstName!, userInfra.LastName!, userInfra.Password!) 
+            { 
+                Id = userInfra.Id,
+                ResumeIds = userInfra.ResumeIds
+            };
+            return user;
         }
     }
 }
