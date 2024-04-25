@@ -32,8 +32,8 @@ namespace ResumeBuilder.Api.Resumes
 
         [HttpGet]
         [ProducesResponseType(typeof(string), 200)]
-        [ProducesResponseType(typeof(string), 400)]
         [ProducesResponseType(typeof(string), 401)]
+        [ProducesResponseType(typeof(string), 500)]
         public async Task<IActionResult> GetResumes()
         {
             try
@@ -53,8 +53,8 @@ namespace ResumeBuilder.Api.Resumes
 
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(string), 200)]
-        [ProducesResponseType(typeof(string), 400)]
         [ProducesResponseType(typeof(string), 401)]
+        [ProducesResponseType(typeof(string), 500)]
         public async Task<IActionResult> GetResume(string id)
         {
             var resume = await _resumeRepository.GetResume(id);

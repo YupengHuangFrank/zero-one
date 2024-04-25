@@ -22,6 +22,7 @@ namespace ResumeBuilder.Api.Users
         [HttpPost]
         [ProducesResponseType(typeof(string), 201)]
         [ProducesResponseType(typeof(string), 400)]
+        [ProducesResponseType(typeof(string), 500)]
         public async Task<ActionResult> RegisterAsync([FromBody] UserApi user)
         {
             var domainUser = Map<UserApi, User>(user);

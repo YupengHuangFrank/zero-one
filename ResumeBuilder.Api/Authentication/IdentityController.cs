@@ -21,6 +21,7 @@ namespace ResumeBuilder.Api.Authentication
         [HttpPost("token")]
         [ProducesResponseType(typeof(SuccessTokenResponseApi), 200)]
         [ProducesResponseType(typeof(ErrorTokenResponseApi), 401)]
+        [ProducesResponseType(typeof(string), 500)]
         public async Task<IActionResult> GenerateTokenAsync([FromBody] TokenRequestApi tokenRequestApi)
         {
             var tokenRequest = Map<TokenRequestApi, TokenRequest>(tokenRequestApi);
