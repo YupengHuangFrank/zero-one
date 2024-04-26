@@ -40,14 +40,12 @@ namespace ResumeBuilder.Api.Resumes
             {
                 var user = await GetUserFromToken(HttpContext);
                 var resumes = await _resumeRepository.GetResumes(user.ResumeIds);
-                if (resumes.Any() == false)
-                    return NotFound();
 
                 return Ok(resumes.ToJson());
             }
             catch (BearerAuthorizationException ex)
             {
-                return BadRequest(ex.Message);
+                return Unauthorized(ex.Message);
             }
         }
 
@@ -71,16 +69,23 @@ namespace ResumeBuilder.Api.Resumes
         [ProducesResponseType(typeof(string), 500)]
         public async Task<IActionResult> SaveResume([FromBody] ResumeApi resume)
         {
-            var user = await GetUserFromToken(HttpContext);
-            var domainResume = Map<ResumeApi, Resume>(resume);
-            domainResume.UserId = user.Id;
-            var request = new SaveResumeRequest(user, domainResume);
-            var result = await _mediator.Send(request);
+            try
+            {
+                var user = await GetUserFromToken(HttpContext);
+                var domainResume = Map<ResumeApi, Resume>(resume);
+                domainResume.UserId = user.Id;
+                var request = new SaveResumeRequest(user, domainResume);
+                var result = await _mediator.Send(request);
 
-            if (!result.Success)
-                return Problem();
+                if (!result.Success)
+                    return BadRequest();
 
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (BearerAuthorizationException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
         }
 
         private async Task<User> GetUserFromToken(HttpContext context)
