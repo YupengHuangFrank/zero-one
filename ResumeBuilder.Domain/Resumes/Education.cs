@@ -8,7 +8,7 @@
         public int? GraduationMonth { get; set; }
         public int? GraduationYear { get; set; }
         public Address? Address { get; set; }
-        public double GPA { get; set; }
+        public double? GPA { get; set; }
         public IEnumerable<string>? Courses { get; set; }
         public IEnumerable<string>? Honors { get; set; }
     }
