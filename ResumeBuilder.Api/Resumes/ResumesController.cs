@@ -91,11 +91,11 @@ namespace ResumeBuilder.Api.Resumes
         private async Task<User> GetUserFromToken(HttpContext context)
         {
             var token = GetBearerToken(context);
-            var email = token.Payload[JwtRegisteredClaimNames.Email];
-            if (email == null)
+            var userId = token.Payload[JwtRegisteredClaimNames.Sub];
+            if (userId == null)
                 throw new BearerAuthorizationException("Invalid token.");
 
-            var user = await _userRepository.GetUser(email.ToString()!);
+            var user = await _userRepository.GetUser(userId.ToString()!);
             if (user == null)
                 throw new BearerAuthorizationException("User not found.");
 

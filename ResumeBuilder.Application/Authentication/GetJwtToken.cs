@@ -8,6 +8,7 @@ using ResumeBuilder.Domain.Users;
 using ResumeBuilder.Infrastructure.Repositories.Users;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 
@@ -28,7 +29,7 @@ namespace ResumeBuilder.Application.Authentication
 
         public async Task<GetJwtTokenResponse> Handle(GetJwtTokenRequest request, CancellationToken cancellationToken)
         {
-            var user = await _userRepository.GetUser(request.TokenRequest.Email!);
+            var user = await _userRepository.GetUserFromEmail(request.TokenRequest.Email!);
             if (user == null)
                 return new GetJwtTokenResponse(string.Empty);
 
@@ -43,19 +44,21 @@ namespace ResumeBuilder.Application.Authentication
                 Console.WriteLine("Password needs to be rehashed.");
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]!);
+            var rsaKey = RSA.Create();
+            rsaKey.ImportRSAPrivateKey(Convert.FromBase64String(_configuration["JwtSettings:PrivateKey"]!), out _);
 
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Email, request.TokenRequest.Email!),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id!),
                 new Claim(JwtRegisteredClaimNames.Iss, _configuration["JwtSettings:Issuer"]!),
+                new Claim(JwtRegisteredClaimNames.Aud, _configuration["JwtSettings:Audience"]!),
               };
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddHours(1),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(new RsaSecurityKey(rsaKey), SecurityAlgorithms.RsaSha256)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);

@@ -9,7 +9,8 @@ namespace ResumeBuilder.Infrastructure.Repositories.Users
     {
         Task<int> CreateUser(User user);
         Task<int> UpdateUser(User user);
-        Task<User?> GetUser(string email);
+        Task<User?> GetUserFromEmail(string email);
+        Task<User?> GetUser(string id);
     }
 
     public class UserRepository : IUserRepository
@@ -40,9 +41,24 @@ namespace ResumeBuilder.Infrastructure.Repositories.Users
             return result.IsAcknowledged ? 1 : 0;
         }
 
-        public async Task<User?> GetUser(string email)
+        public async Task<User?> GetUserFromEmail(string email)
         {
             var userInfras = await _userCollection.FindAsync(x => x.Email == email);
+            var userInfra = userInfras.FirstOrDefault();
+            if (userInfra == null)
+                return null;
+
+            var user = new User(userInfra.Email!, userInfra.FirstName!, userInfra.LastName!, userInfra.Password!)
+            {
+                Id = userInfra.Id,
+                ResumeIds = userInfra.ResumeIds
+            };
+            return user;
+        }
+
+        public async Task<User?> GetUser(string id)
+        {
+            var userInfras = await _userCollection.FindAsync(x => x.Id == id);
             var userInfra = userInfras.FirstOrDefault();
             if (userInfra == null)
                 return null;

@@ -4,13 +4,13 @@ using ResumeBuilder.Application;
 using ResumeBuilder.Infrastructure;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Text;
 using MongoDB.Driver;
 using ResumeBuilder.Infrastructure.Repositories.Users.Models;
 using ResumeBuilder.Infrastructure.Repositories.Users;
 using Microsoft.OpenApi.Models;
 using ResumeBuilder.Infrastructure.Repositories.Resumes;
 using ResumeBuilder.Infrastructure.Repositories.Resumes.Models;
+using System.Security.Cryptography;
 
 [ExcludeFromCodeCoverage]
 public class Program
@@ -25,18 +25,22 @@ public class Program
 #endif
         builder.Services.AddControllers();
         var config = builder.Configuration;
+
+        var rsaKey = RSA.Create();
+        rsaKey.ImportRSAPublicKey(Convert.FromBase64String(config["JwtSettings:PublicKey"]!), out _);
+
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(x =>
             {
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidIssuer = config["JwtSettings:Issuer"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:Key"]!)),
+                    ValidAudience = config["JwtSettings:Audience"],
+                    IssuerSigningKey = new RsaSecurityKey(rsaKey),
                     ValidateIssuer = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidateAudience = false
-                };
+               };
             });
         builder.Services.AddAuthorization();
         builder.Services.AddEndpointsApiExplorer();
