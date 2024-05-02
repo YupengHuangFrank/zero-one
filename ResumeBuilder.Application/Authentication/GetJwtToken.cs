@@ -9,7 +9,6 @@ using ResumeBuilder.Infrastructure.Repositories.Users;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Text;
 
 
 namespace ResumeBuilder.Application.Authentication
@@ -31,14 +30,14 @@ namespace ResumeBuilder.Application.Authentication
         {
             var user = await _userRepository.GetUserFromEmail(request.TokenRequest.Email!);
             if (user == null)
-                return new GetJwtTokenResponse(string.Empty);
+                return new GetJwtTokenResponse(string.Empty, string.Empty);
 
             if (string.IsNullOrWhiteSpace(user.Password))
-                return new GetJwtTokenResponse(string.Empty);
+                return new GetJwtTokenResponse(string.Empty, string.Empty);
 
             var verificationResult = _passwordHasher.VerifyHashedPassword(string.Empty, user.Password, request.TokenRequest.Password!);
             if (verificationResult.Equals(PasswordVerificationResult.Failed))
-                return new GetJwtTokenResponse(string.Empty);
+                return new GetJwtTokenResponse(string.Empty, string.Empty);
             
             if (verificationResult.Equals(PasswordVerificationResult.SuccessRehashNeeded))
                 Console.WriteLine("Password needs to be rehashed.");
@@ -47,24 +46,43 @@ namespace ResumeBuilder.Application.Authentication
             var rsaKey = RSA.Create();
             rsaKey.ImportRSAPrivateKey(Convert.FromBase64String(_configuration["JwtSettings:PrivateKey"]!), out _);
 
-            var claims = new List<Claim>
+            var accessTokenClaims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id!),
                 new Claim(JwtRegisteredClaimNames.Iss, _configuration["JwtSettings:Issuer"]!),
                 new Claim(JwtRegisteredClaimNames.Aud, _configuration["JwtSettings:Audience"]!),
-              };
+                new Claim(JwtRegisteredClaimNames.Typ, _configuration["JwtSettings:AccessTokenTypeName"]!),
+             };
 
-            var tokenDescriptor = new SecurityTokenDescriptor
+            var accessTokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(claims),
+                Subject = new ClaimsIdentity(accessTokenClaims),
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new RsaSecurityKey(rsaKey), SecurityAlgorithms.RsaSha256)
             };
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var accessToken = tokenHandler.CreateToken(accessTokenDescriptor);
 
-            var jwt = $"Bearer {tokenHandler.WriteToken(token)}";
-            return new GetJwtTokenResponse(jwt);
+            var refreshTokenClaims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id!),
+                new Claim(JwtRegisteredClaimNames.Iss, _configuration["JwtSettings:Issuer"]!),
+                new Claim(JwtRegisteredClaimNames.Aud, _configuration["JwtSettings:Audience"]!),
+                new Claim(JwtRegisteredClaimNames.Typ, _configuration["JwtSettings:RefreshTokenTypeName"]!),
+            };
+
+            var refreshTokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(refreshTokenClaims),
+                Expires = DateTime.UtcNow.AddHours(24),
+                SigningCredentials = new SigningCredentials(new RsaSecurityKey(rsaKey), SecurityAlgorithms.RsaSha256)
+            };
+
+            var refreshToken = tokenHandler.CreateToken(refreshTokenDescriptor);
+
+            var accessTokenString = $"Bearer {tokenHandler.WriteToken(accessToken)}";
+            var refreshTokenString = tokenHandler.WriteToken(refreshToken);
+            return new GetJwtTokenResponse(accessTokenString, refreshTokenString);
         }
     }
 
@@ -80,11 +98,13 @@ namespace ResumeBuilder.Application.Authentication
 
     public class GetJwtTokenResponse
     {
-        public string? JwtToken { get; set; }
+        public string? AccessToken { get; set; }
+        public string? RefreshToken { get; set; }
 
-        public GetJwtTokenResponse(string jwtToken)
+        public GetJwtTokenResponse(string jwtToken, string? refreshToken)
         {
-            JwtToken = jwtToken;
+            AccessToken = jwtToken;
+            RefreshToken = refreshToken;
         }
     }
 }

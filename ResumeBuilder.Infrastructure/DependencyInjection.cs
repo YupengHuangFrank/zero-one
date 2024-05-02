@@ -10,7 +10,7 @@ namespace ResumeBuilder.Infrastructure
     [ExcludeFromCodeCoverage]
     public static class DependencyInjection
     {
-        public static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration) 
+        public static void AddInfrastructure(this IServiceCollection services) 
         {
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddSingleton<IUserRepository, UserRepository>();

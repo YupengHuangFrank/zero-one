@@ -10,7 +10,7 @@ namespace ResumeBuilder.Application
     [ExcludeFromCodeCoverage]
     public static class DependencyInjection
     {
-        public static void AddApplication(this IServiceCollection services, IConfiguration configuration)
+        public static void AddApplication(this IServiceCollection services)
         {
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));

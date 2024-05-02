@@ -16,7 +16,7 @@ namespace ResumeBuilder.Api.Resumes
 {
     [ApiController]
     [Route("[controller]")]
-    [Authorize]
+    [Authorize(AuthenticationSchemes="access")]
     public class ResumesController : ResumeBuilderBaseController
     {
         private readonly IResumeRepository _resumeRepository;

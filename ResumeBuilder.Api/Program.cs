@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using ResumeBuilder.Infrastructure.Repositories.Resumes;
 using ResumeBuilder.Infrastructure.Repositories.Resumes.Models;
 using System.Security.Cryptography;
+using Microsoft.IdentityModel.Logging;
 
 [ExcludeFromCodeCoverage]
 public class Program
@@ -30,7 +31,7 @@ public class Program
         rsaKey.ImportRSAPublicKey(Convert.FromBase64String(config["JwtSettings:PublicKey"]!), out _);
 
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(x =>
+            .AddJwtBearer("access", x =>
             {
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -40,7 +41,37 @@ public class Program
                     ValidateIssuer = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-               };
+                };
+                x.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var cookieName = config["JwtSettings:AccessTokenCookieName"]!;
+                        context.Token = string.IsNullOrWhiteSpace(context.Request.Cookies[cookieName]) ? context.Request.Headers[cookieName] : context.Request.Cookies[cookieName];
+                        return Task.CompletedTask;
+                    }
+                };
+            })
+            .AddJwtBearer("refresh", x =>
+            {
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = config["JwtSettings:Issuer"],
+                    ValidAudience = config["JwtSettings:Audience"],
+                    IssuerSigningKey = new RsaSecurityKey(rsaKey),
+                    ValidateIssuer = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                };
+                x.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var cookieName = config["JwtSettings:RefreshTokenCookieName"]!;
+                        context.Token = string.IsNullOrWhiteSpace(context.Request.Cookies[cookieName]) ? context.Request.Headers[cookieName] : context.Request.Cookies[cookieName];
+                        return Task.CompletedTask;
+                    }
+                };
             });
         builder.Services.AddAuthorization();
         builder.Services.AddEndpointsApiExplorer();
@@ -71,8 +102,8 @@ public class Program
                 });
             }
         );
-        builder.Services.AddApplication(builder.Configuration);
-        builder.Services.AddInfrastructure(builder.Configuration);
+        builder.Services.AddApplication();
+        builder.Services.AddInfrastructure();
         builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
         ConfigureMongoDb(builder.Services, config);
 
@@ -98,6 +129,8 @@ public class Program
 
         app.MapControllers();
 
+        // This will be added back once we get the ValidTypes thing working
+        //IdentityModelEventSource.ShowPII = true;
         app.Run();
     }
 
