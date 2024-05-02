@@ -80,7 +80,6 @@ namespace ResumeBuilder.Api.Authentication
         }
 
         [HttpPost("refresh")]
-        [Authorize(AuthenticationSchemes="refresh")]
         [ProducesResponseType(typeof(SuccessTokenResponseApi), 200)]
         [ProducesResponseType(typeof(ErrorTokenResponseApi), 401)]
         [ProducesResponseType(typeof(string), 500)]

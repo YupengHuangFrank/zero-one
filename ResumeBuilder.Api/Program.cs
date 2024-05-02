@@ -68,7 +68,7 @@ public class Program
                     OnMessageReceived = context =>
                     {
                         var cookieName = config["JwtSettings:RefreshTokenCookieName"]!;
-                        context.Token = string.IsNullOrWhiteSpace(context.Request.Cookies[cookieName]) ? context.Request.Headers[cookieName] : context.Request.Cookies[cookieName];
+                        context.Token = context.Request.Cookies[cookieName];
                         return Task.CompletedTask;
                     }
                 };
