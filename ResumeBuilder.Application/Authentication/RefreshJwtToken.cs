@@ -36,10 +36,14 @@ namespace ResumeBuilder.Application.Authentication
                 new Claim(JwtRegisteredClaimNames.Typ, _configuration["JwtSettings:AccessTokenTypeName"]!),
              };
 
+            var success = int.TryParse(_configuration["JwtSettings:AccessTokenExpiration"]!, out var accessTokenValidMinutes);
+            if (!success)
+                throw new Exception("Invalid configuration for access token expiration.");
+
             var accessTokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(accessTokenClaims),
-                Expires = DateTime.UtcNow.AddHours(1),
+                Expires = DateTime.UtcNow.AddMinutes(accessTokenValidMinutes),
                 SigningCredentials = new SigningCredentials(new RsaSecurityKey(rsaKey), SecurityAlgorithms.RsaSha256)
             };
 
