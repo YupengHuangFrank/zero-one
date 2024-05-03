@@ -12,6 +12,10 @@ using ResumeBuilder.Infrastructure.Repositories.Resumes;
 using ResumeBuilder.Infrastructure.Repositories.Resumes.Models;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
+using System.Web;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Net.Http.Headers;
 
 [ExcludeFromCodeCoverage]
 public class Program
@@ -31,8 +35,10 @@ public class Program
         rsaKey.ImportRSAPublicKey(Convert.FromBase64String(config["JwtSettings:PublicKey"]!), out _);
 
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddCookie()
             .AddJwtBearer("access", x =>
             {
+                x.SaveToken = false;
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidIssuer = config["JwtSettings:Issuer"],
@@ -42,12 +48,15 @@ public class Program
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
                 };
+
                 x.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
                     {
                         var cookieName = config["JwtSettings:AccessTokenCookieName"]!;
-                        context.Token = string.IsNullOrWhiteSpace(context.Request.Cookies[cookieName]) ? context.Request.Headers[cookieName] : context.Request.Cookies[cookieName];
+                        var cookieToken = context.Request.Cookies[cookieName];
+                        var headerToken = context.Request.Headers[HeaderNames.Authorization];
+                        context.Token = cookieToken != null ? cookieToken : headerToken;
                         return Task.CompletedTask;
                     }
                 };
@@ -68,7 +77,9 @@ public class Program
                     OnMessageReceived = context =>
                     {
                         var cookieName = config["JwtSettings:RefreshTokenCookieName"]!;
-                        context.Token = context.Request.Cookies[cookieName];
+                        var cookieToken = context.Request.Cookies[cookieName];
+                        var headerToken = context.Request.Headers[HeaderNames.Authorization];
+                        context.Token = cookieToken != null ? cookieToken : headerToken;
                         return Task.CompletedTask;
                     }
                 };
@@ -84,7 +95,7 @@ public class Program
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\"",
+                    Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter your token in the text input below.\r\n\r\nExample: \"12345abcdef\"",
                 });
                 swagger.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {

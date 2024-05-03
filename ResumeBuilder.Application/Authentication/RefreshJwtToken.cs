@@ -48,7 +48,7 @@ namespace ResumeBuilder.Application.Authentication
             };
 
             var newAccessToken = tokenHandler.CreateToken(accessTokenDescriptor);
-            var newAccessTokenString = $"Bearer {tokenHandler.WriteToken(newAccessToken)}";
+            var newAccessTokenString = tokenHandler.WriteToken(newAccessToken);
             return Task.FromResult(new RefreshJwtTokenResponse { AccessToken = newAccessTokenString });
         }
     }

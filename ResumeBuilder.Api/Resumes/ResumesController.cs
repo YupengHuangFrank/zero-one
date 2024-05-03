@@ -22,12 +22,14 @@ namespace ResumeBuilder.Api.Resumes
         private readonly IResumeRepository _resumeRepository;
         private readonly IUserRepository _userRepository;
         private readonly IMediator _mediator;
+        private readonly IConfiguration _configuration;
 
-        public ResumesController(IResumeRepository resumeRepository, IUserRepository userRepository, IMediator mediator, IMapper mapper) : base(mapper)
+        public ResumesController(IResumeRepository resumeRepository, IUserRepository userRepository, IMediator mediator, IMapper mapper, IConfiguration configuration) : base(mapper)
         {
             _resumeRepository = resumeRepository;
             _userRepository = userRepository;
             _mediator = mediator;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -104,8 +106,10 @@ namespace ResumeBuilder.Api.Resumes
 
         private JwtSecurityToken GetBearerToken(HttpContext context)
         {
-            var bearerToken = context.Request.Headers["Authorization"];
-            var tokenString = bearerToken.ToString().Replace("Bearer ", string.Empty);
+            var bearerToken = string.IsNullOrEmpty(context.Request.Headers["Authorization"]) 
+                ? context.Request.Cookies[_configuration["JwtSettings:AccessTokenCookieName"]!] 
+                : context.Request.Headers["Authorization"].ToString();
+            var tokenString = bearerToken?.ToString().Replace("Bearer ", string.Empty);
             var handler = new JwtSecurityTokenHandler();
             var token = handler.ReadJwtToken(tokenString);
             return token;

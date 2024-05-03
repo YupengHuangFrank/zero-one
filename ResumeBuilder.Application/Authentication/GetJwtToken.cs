@@ -89,7 +89,7 @@ namespace ResumeBuilder.Application.Authentication
 
             var refreshToken = tokenHandler.CreateToken(refreshTokenDescriptor);
 
-            var accessTokenString = $"Bearer {tokenHandler.WriteToken(accessToken)}";
+            var accessTokenString = tokenHandler.WriteToken(accessToken);
             var refreshTokenString = tokenHandler.WriteToken(refreshToken);
             return new GetJwtTokenResponse(accessTokenString, refreshTokenString);
         }
