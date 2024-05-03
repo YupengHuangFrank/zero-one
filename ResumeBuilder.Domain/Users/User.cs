@@ -7,6 +7,7 @@
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Password { get; set; }
+        public UserType UserType { get; set; } = UserType.User;
         public IEnumerable<string> ResumeIds { get; set; } = new List<string>();
 
         public User(string? email, string? firstName, string? lastName, string? password)

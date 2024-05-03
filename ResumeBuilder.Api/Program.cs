@@ -38,11 +38,11 @@ public class Program
             .AddCookie()
             .AddJwtBearer("access", x =>
             {
-                x.SaveToken = false;
+                x.MapInboundClaims= false;
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidIssuer = config["JwtSettings:Issuer"],
-                    ValidAudience = config["JwtSettings:Audience"],
+                    ValidAudience = config["JwtSettings:AccessTokenAudience"],
                     IssuerSigningKey = new RsaSecurityKey(rsaKey),
                     ValidateIssuer = true,
                     ValidateLifetime = true,
@@ -66,7 +66,7 @@ public class Program
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidIssuer = config["JwtSettings:Issuer"],
-                    ValidAudience = config["JwtSettings:Audience"],
+                    ValidAudience = config["JwtSettings:RefreshTokenAudience"],
                     IssuerSigningKey = new RsaSecurityKey(rsaKey),
                     ValidateIssuer = true,
                     ValidateLifetime = true,

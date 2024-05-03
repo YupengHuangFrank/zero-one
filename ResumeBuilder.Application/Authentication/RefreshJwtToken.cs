@@ -23,6 +23,10 @@ namespace ResumeBuilder.Application.Authentication
             rsaKey.ImportRSAPrivateKey(Convert.FromBase64String(_configuration["JwtSettings:PrivateKey"]!), out _);
 
             var refreshToken = tokenHandler.ReadJwtToken(request.RefreshToken);
+            var audience = refreshToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Aud)?.Value;
+            if (audience != _configuration["JwtSettings:RefreshTokenAudience"])
+                return Task.FromResult(new RefreshJwtTokenResponse());
+
             var userId = refreshToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
 
             if (string.IsNullOrWhiteSpace(userId))
@@ -32,8 +36,7 @@ namespace ResumeBuilder.Application.Authentication
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userId),
                 new Claim(JwtRegisteredClaimNames.Iss, _configuration["JwtSettings:Issuer"]!),
-                new Claim(JwtRegisteredClaimNames.Aud, _configuration["JwtSettings:Audience"]!),
-                new Claim(JwtRegisteredClaimNames.Typ, _configuration["JwtSettings:AccessTokenTypeName"]!),
+                new Claim(JwtRegisteredClaimNames.Aud, _configuration["JwtSettings:AccessTokenAudience"]!)
              };
 
             var success = int.TryParse(_configuration["JwtSettings:AccessTokenExpiration"]!, out var accessTokenValidMinutes);
