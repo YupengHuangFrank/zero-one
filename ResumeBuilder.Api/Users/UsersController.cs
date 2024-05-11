@@ -26,7 +26,9 @@ namespace ResumeBuilder.Api.Users
         public async Task<ActionResult> RegisterAsync([FromBody] UserApi user)
         {
             var domainUser = Map<UserApi, User>(user);
-            var request = new CreateUserRequest(domainUser);
+            domainUser.IsVerified = false;
+            var confirmEmailUri = Request.Scheme + "://" + Request.Host.Value + "/identity/confirm-email";
+            var request = new CreateUserRequest(domainUser, confirmEmailUri);
             var result = await _mediator.Send(request);
             if (result.NumberOfUserCreated <= 0)
                 return BadRequest("User already exists.");

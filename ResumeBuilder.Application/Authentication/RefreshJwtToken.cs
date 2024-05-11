@@ -25,12 +25,12 @@ namespace ResumeBuilder.Application.Authentication
             var refreshToken = tokenHandler.ReadJwtToken(request.RefreshToken);
             var audience = refreshToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Aud)?.Value;
             if (audience != _configuration["JwtSettings:RefreshTokenAudience"])
-                return Task.FromResult(new RefreshJwtTokenResponse());
+                return Task.FromResult(new RefreshJwtTokenResponse(null));
 
             var userId = refreshToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
 
             if (string.IsNullOrWhiteSpace(userId))
-                return Task.FromResult(new RefreshJwtTokenResponse());
+                return Task.FromResult(new RefreshJwtTokenResponse(null));
 
             var accessTokenClaims = new List<Claim>
             {
@@ -52,7 +52,7 @@ namespace ResumeBuilder.Application.Authentication
 
             var newAccessToken = tokenHandler.CreateToken(accessTokenDescriptor);
             var newAccessTokenString = tokenHandler.WriteToken(newAccessToken);
-            return Task.FromResult(new RefreshJwtTokenResponse { AccessToken = newAccessTokenString });
+            return Task.FromResult(new RefreshJwtTokenResponse(newAccessTokenString));
         }
     }
 
@@ -69,6 +69,11 @@ namespace ResumeBuilder.Application.Authentication
 
     public class RefreshJwtTokenResponse
     {
-        public string? AccessToken { get; set; }
+        public string? AccessToken { get; }
+
+        public RefreshJwtTokenResponse(string? accessToken)
+        {
+            AccessToken = accessToken;
+        }
     }
 }

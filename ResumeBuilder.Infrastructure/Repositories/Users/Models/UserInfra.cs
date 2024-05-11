@@ -13,6 +13,8 @@ namespace ResumeBuilder.Infrastructure.Repositories.Users.Models
         public string? LastName { get; set; }
         public string? Password { get; set; }
         public UserInfraType UserType { get; set; } = UserInfraType.User;
+        public bool? IsVerified { get; set; }
+        public string? ResetPasswordCode { get; set; }
         public IEnumerable<string> ResumeIds { get; set; } = new List<string>();
     }
 }

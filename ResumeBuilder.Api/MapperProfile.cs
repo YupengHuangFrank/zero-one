@@ -12,7 +12,7 @@ namespace ResumeBuilder.Api
     {
         public MapperProfile()
         {
-            CreateMap<UserApi, Domain.Users.User>().ConstructUsing(x => new Domain.Users.User(x.Email, x.FirstName, x.LastName, x.Password));
+            CreateMap<UserApi, Domain.Users.User>().ConstructUsing(x => new Domain.Users.User(x.Email, x.FirstName, x.LastName, x.Password, false));
             CreateMap<TokenRequestApi, Domain.Authentication.TokenRequest>();
             CreateMap<EducationApi, Education>();
             CreateMap<HeaderApi, Header>();

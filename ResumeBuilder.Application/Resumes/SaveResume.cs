@@ -36,8 +36,8 @@ namespace ResumeBuilder.Application.Resumes
 
     public class SaveResumeRequest : IRequest<SaveResumeResult>
     {
-        public User User { get; set; }
-        public Resume Resume { get; set; }
+        public User User { get; }
+        public Resume Resume { get; }
 
         public SaveResumeRequest(User user, Resume resume)
         {

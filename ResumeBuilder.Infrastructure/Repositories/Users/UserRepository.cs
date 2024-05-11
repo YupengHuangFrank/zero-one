@@ -11,6 +11,7 @@ namespace ResumeBuilder.Infrastructure.Repositories.Users
         Task<int> UpdateUser(User user);
         Task<User?> GetUserFromEmail(string email);
         Task<User?> GetUser(string id);
+        Task SetResetPasswordCode(string email, string code);
     }
 
     public class UserRepository : IUserRepository
@@ -48,9 +49,10 @@ namespace ResumeBuilder.Infrastructure.Repositories.Users
             if (userInfra == null)
                 return null;
 
-            var user = new User(userInfra.Email!, userInfra.FirstName!, userInfra.LastName!, userInfra.Password!)
+            var user = new User(userInfra.Email!, userInfra.FirstName!, userInfra.LastName!, userInfra.Password!, userInfra.IsVerified!)
             {
                 Id = userInfra.Id,
+                ResetPasswordCode = userInfra.ResetPasswordCode,
                 ResumeIds = userInfra.ResumeIds
             };
             return user;
@@ -63,12 +65,17 @@ namespace ResumeBuilder.Infrastructure.Repositories.Users
             if (userInfra == null)
                 return null;
 
-            var user = new User(userInfra.Email!, userInfra.FirstName!, userInfra.LastName!, userInfra.Password!) 
+            var user = new User(userInfra.Email!, userInfra.FirstName!, userInfra.LastName!, userInfra.Password!, userInfra.IsVerified!) 
             { 
                 Id = userInfra.Id,
                 ResumeIds = userInfra.ResumeIds
             };
             return user;
+        }
+
+        public async Task SetResetPasswordCode(string email, string? code)
+        {
+            await _userCollection.UpdateOneAsync(x => x.Email == email, Builders<UserInfra>.Update.Set(x => x.ResetPasswordCode, code));
         }
     }
 }

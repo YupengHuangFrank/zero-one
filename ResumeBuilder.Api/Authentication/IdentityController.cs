@@ -23,7 +23,7 @@ namespace ResumeBuilder.Api.Authentication
 
         [HttpPost("token")]
         [ProducesResponseType(typeof(SuccessTokenResponseApi), 200)]
-        [ProducesResponseType(typeof(ErrorTokenResponseApi), 401)]
+        [ProducesResponseType(typeof(ErrorResponseApi), 401)]
         [ProducesResponseType(typeof(string), 500)]
         public async Task<IActionResult> GenerateTokenAsync([FromBody] TokenRequestApi tokenRequestApi)
         {
@@ -32,10 +32,20 @@ namespace ResumeBuilder.Api.Authentication
             var response = await _mediator.Send(request);
             if (string.IsNullOrEmpty(response.AccessToken))
             {
-                var errorResponse = new ErrorTokenResponseApi 
+                var errorResponse = new ErrorResponseApi 
                 {
                     Error = "invalid_client",
                     ErrorMessage = "Email or password incorrect."
+                };
+                return Unauthorized(errorResponse);
+            }
+
+            if (response.IsVerified is not null && !response.IsVerified.Value)
+            {
+                var errorResponse = new ErrorResponseApi
+                {
+                    Error = "user_not_verified",
+                    ErrorMessage = "The email of the user is not verified"
                 };
                 return Unauthorized(errorResponse);
             }
@@ -68,7 +78,7 @@ namespace ResumeBuilder.Api.Authentication
         [HttpGet("refresh")]
         [Authorize(AuthenticationSchemes="refresh")]
         [ProducesResponseType(typeof(SuccessTokenResponseApi), 200)]
-        [ProducesResponseType(typeof(ErrorTokenResponseApi), 401)]
+        [ProducesResponseType(typeof(ErrorResponseApi), 401)]
         [ProducesResponseType(typeof(string), 500)]
         public async Task<IActionResult> RefreshTokenAsync()
         {
@@ -77,7 +87,7 @@ namespace ResumeBuilder.Api.Authentication
             var response = await _mediator.Send(request);
             if (string.IsNullOrEmpty(response.AccessToken))
             {
-                var errorResponse = new ErrorTokenResponseApi
+                var errorResponse = new ErrorResponseApi
                 {
                     Error = "invalid_client",
                     ErrorMessage = "Invalid refresh token."
@@ -104,7 +114,7 @@ namespace ResumeBuilder.Api.Authentication
 
         [HttpPost("refresh")]
         [ProducesResponseType(typeof(SuccessTokenResponseApi), 200)]
-        [ProducesResponseType(typeof(ErrorTokenResponseApi), 401)]
+        [ProducesResponseType(typeof(ErrorResponseApi), 401)]
         [ProducesResponseType(typeof(string), 500)]
         public async Task<IActionResult> RefreshTokenAsync([FromBody] RefreshAccessTokenApi refreshAccessTokenApi)
         {
@@ -113,7 +123,7 @@ namespace ResumeBuilder.Api.Authentication
             var response = await _mediator.Send(request);
             if (string.IsNullOrEmpty(response.AccessToken))
             {
-                var errorResponse = new ErrorTokenResponseApi
+                var errorResponse = new ErrorResponseApi
                 {
                     Error = "invalid_client",
                     ErrorMessage = "Invalid refresh token."
@@ -156,6 +166,67 @@ namespace ResumeBuilder.Api.Authentication
                 Expires = DateTime.UtcNow.AddMinutes(-1)
             });
             return Ok();
+        }
+
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string email)
+        {
+            var request = new ConfirmEmailRequest(email);
+            var result = await _mediator.Send(request);
+            return Ok(result);
+        }
+
+        [HttpGet("forget-password")]
+        public async Task<IActionResult> ForgetPassword([FromQuery] string email)
+        {
+            try
+            {
+                var request = new ForgetPasswordRequest(email);
+                var result = await _mediator.Send(request);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {                 
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("validate-reset-password-code")]
+        public async Task<IActionResult> ValidateResetPasswordCode(ValidateResetPasswordCodeParametersApi parametersApi)
+        {
+            try
+            {
+                var email = parametersApi.Email!;
+                var code = parametersApi.ResetPasswordCode!;
+                var request = new ValidateResetPasswordCodeRequest(email, code);
+                var result = await _mediator.Send(request);
+                if (result.ResetPasswordPath is null)
+                    return BadRequest("Invalid reset password code.");
+
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromQuery] string email, [FromQuery] string resetPasswordCode, ResetPasswordParametersApi parametersApi)
+        {
+            try 
+            {
+                var request = new ResetPasswordRequest(email, resetPasswordCode, parametersApi.Password);
+                var result = await _mediator.Send(request);
+                if (!result.Success)
+                    return BadRequest("Wrong email or code");
+
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

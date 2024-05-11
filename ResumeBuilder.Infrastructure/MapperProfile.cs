@@ -2,9 +2,10 @@
 using ResumeBuilder.Domain.Resumes;
 using ResumeBuilder.Domain.Users;
 using ResumeBuilder.Infrastructure.Repositories.Resumes.Models;
+using ResumeBuilder.Infrastructure.Repositories.Users.Models;
 using System.Diagnostics.CodeAnalysis;
 
-namespace ResumeBuilder.Infrastructure.Repositories.Users.Models
+namespace ResumeBuilder.Infrastructure
 {
     [ExcludeFromCodeCoverage]
     public class MapperProfile : Profile
@@ -25,7 +26,6 @@ namespace ResumeBuilder.Infrastructure.Repositories.Users.Models
             CreateMap<TemplateInfra, Template>();
             CreateMap<WorkExperienceInfra, WorkExperience>();
             CreateMap<AddressInfra, Address>();
-
         }
     }
 }

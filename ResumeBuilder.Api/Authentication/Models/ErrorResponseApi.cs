@@ -2,7 +2,7 @@
 
 namespace ResumeBuilder.Api.Authentication.Models
 {
-    public class ErrorTokenResponseApi
+    public class ErrorResponseApi
     {
         [JsonPropertyName("error")]
         public string? Error { get; set; }

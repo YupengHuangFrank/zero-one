@@ -30,14 +30,14 @@ namespace ResumeBuilder.Application.Authentication
         {
             var user = await _userRepository.GetUserFromEmail(request.TokenRequest.Email!);
             if (user == null)
-                return new GetJwtTokenResponse(string.Empty, string.Empty);
+                return new GetJwtTokenResponse(string.Empty, string.Empty, null);
 
             if (string.IsNullOrWhiteSpace(user.Password))
-                return new GetJwtTokenResponse(string.Empty, string.Empty);
+                return new GetJwtTokenResponse(string.Empty, string.Empty, null);
 
             var verificationResult = _passwordHasher.VerifyHashedPassword(string.Empty, user.Password, request.TokenRequest.Password!);
             if (verificationResult.Equals(PasswordVerificationResult.Failed))
-                return new GetJwtTokenResponse(string.Empty, string.Empty);
+                return new GetJwtTokenResponse(string.Empty, string.Empty, null);
             
             if (verificationResult.Equals(PasswordVerificationResult.SuccessRehashNeeded))
                 Console.WriteLine("Password needs to be rehashed.");
@@ -89,13 +89,13 @@ namespace ResumeBuilder.Application.Authentication
 
             var accessTokenString = tokenHandler.WriteToken(accessToken);
             var refreshTokenString = tokenHandler.WriteToken(refreshToken);
-            return new GetJwtTokenResponse(accessTokenString, refreshTokenString);
+            return new GetJwtTokenResponse(accessTokenString, refreshTokenString, user.IsVerified);
         }
     }
 
     public class GetJwtTokenRequest : IRequest<GetJwtTokenResponse>
     {
-        public TokenRequest TokenRequest { get; set; }
+        public TokenRequest TokenRequest { get; }
 
         public GetJwtTokenRequest(TokenRequest tokenRequest)
         {
@@ -107,11 +107,13 @@ namespace ResumeBuilder.Application.Authentication
     {
         public string? AccessToken { get; set; }
         public string? RefreshToken { get; set; }
+        public bool? IsVerified { get; set; }
 
-        public GetJwtTokenResponse(string jwtToken, string? refreshToken)
+        public GetJwtTokenResponse(string jwtToken, string? refreshToken , bool? isVerified)
         {
             AccessToken = jwtToken;
             RefreshToken = refreshToken;
+            IsVerified = isVerified;
         }
     }
 }
