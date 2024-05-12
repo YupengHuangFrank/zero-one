@@ -6,9 +6,9 @@ namespace ResumeBuilder.Api.Authentication.Models
     {
         public string Password { get; set; }
 
-        public ResetPasswordParametersApi()
+        public ResetPasswordParametersApi(string password)
         {
-            Password = string.Empty;
+            Password = password;
         }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

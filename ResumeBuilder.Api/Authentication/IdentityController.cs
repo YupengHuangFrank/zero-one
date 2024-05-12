@@ -62,14 +62,17 @@ namespace ResumeBuilder.Api.Authentication
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                //Disabled for testing purpose
+                //SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddMinutes(int.Parse(_configuration["JwtSettings:AccessTokenExpiration"]!))
             });
             Response.Cookies.Append(_configuration["JwtSettings:RefreshTokenCookieName"]!, response.RefreshToken!, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                //SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddMinutes(int.Parse(_configuration["JwtSettings:RefreshTokenExpiration"]!))
             });
             return Ok(tokenResponse);
@@ -106,7 +109,8 @@ namespace ResumeBuilder.Api.Authentication
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                //SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddMinutes(int.Parse(_configuration["JwtSettings:AccessTokenExpiration"]!))
             });
             return Ok(tokenResponse);
@@ -142,7 +146,8 @@ namespace ResumeBuilder.Api.Authentication
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                //SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddMinutes(int.Parse(_configuration["JwtSettings:AccessTokenExpiration"]!))
             });
             return Ok(tokenResponse);
@@ -155,14 +160,16 @@ namespace ResumeBuilder.Api.Authentication
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                //SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddMinutes(-1)
             });
             Response.Cookies.Append(_configuration["JwtSettings:RefreshTokenCookieName"]!, string.Empty, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                //SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddMinutes(-1)
             });
             return Ok();
