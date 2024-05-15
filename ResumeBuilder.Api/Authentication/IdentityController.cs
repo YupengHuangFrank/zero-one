@@ -62,6 +62,7 @@ namespace ResumeBuilder.Api.Authentication
             {
                 HttpOnly = true,
                 //Disabled for testing purpose
+                Secure = false,
                 //Secure = true,
                 //SameSite = SameSiteMode.Strict,
                 SameSite = SameSiteMode.None,
@@ -71,6 +72,7 @@ namespace ResumeBuilder.Api.Authentication
             {
                 HttpOnly = true,
                 //Disabled for testing purpose
+                Secure = false,
                 //Secure = true,
                 //SameSite = SameSiteMode.Strict,
                 SameSite = SameSiteMode.None,
@@ -109,6 +111,7 @@ namespace ResumeBuilder.Api.Authentication
             Response.Cookies.Append(_configuration["JwtSettings:AccessTokenCookieName"]!, response.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
+                Secure = false,
                 //Secure = true,
                 //SameSite = SameSiteMode.Strict,
                 SameSite = SameSiteMode.None,
@@ -146,6 +149,7 @@ namespace ResumeBuilder.Api.Authentication
             Response.Cookies.Append(_configuration["JwtSettings:AccessTokenCookieName"]!, response.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
+                Secure = false,
                 //Secure = true,
                 //SameSite = SameSiteMode.Strict,
                 SameSite = SameSiteMode.None,
@@ -160,6 +164,7 @@ namespace ResumeBuilder.Api.Authentication
             Response.Cookies.Append(_configuration["JwtSettings:AccessTokenCookieName"]!, string.Empty, new CookieOptions
             {
                 HttpOnly = true,
+                Secure = false,
                 //Secure = true,
                 //SameSite = SameSiteMode.Strict,
                 SameSite = SameSiteMode.None,
@@ -168,6 +173,7 @@ namespace ResumeBuilder.Api.Authentication
             Response.Cookies.Append(_configuration["JwtSettings:RefreshTokenCookieName"]!, string.Empty, new CookieOptions
             {
                 HttpOnly = true,
+                Secure = false,
                 //Secure = true,
                 //SameSite = SameSiteMode.Strict,
                 SameSite = SameSiteMode.None,
