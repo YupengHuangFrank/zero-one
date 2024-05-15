@@ -61,8 +61,8 @@ namespace ResumeBuilder.Api.Authentication
             Response.Cookies.Append(_configuration["JwtSettings:AccessTokenCookieName"]!, response.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
                 //Disabled for testing purpose
+                //Secure = true,
                 //SameSite = SameSiteMode.Strict,
                 SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddMinutes(int.Parse(_configuration["JwtSettings:AccessTokenExpiration"]!))
@@ -70,7 +70,8 @@ namespace ResumeBuilder.Api.Authentication
             Response.Cookies.Append(_configuration["JwtSettings:RefreshTokenCookieName"]!, response.RefreshToken!, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                //Disabled for testing purpose
+                //Secure = true,
                 //SameSite = SameSiteMode.Strict,
                 SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddMinutes(int.Parse(_configuration["JwtSettings:RefreshTokenExpiration"]!))
@@ -108,7 +109,7 @@ namespace ResumeBuilder.Api.Authentication
             Response.Cookies.Append(_configuration["JwtSettings:AccessTokenCookieName"]!, response.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                //Secure = true,
                 //SameSite = SameSiteMode.Strict,
                 SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddMinutes(int.Parse(_configuration["JwtSettings:AccessTokenExpiration"]!))
@@ -145,7 +146,7 @@ namespace ResumeBuilder.Api.Authentication
             Response.Cookies.Append(_configuration["JwtSettings:AccessTokenCookieName"]!, response.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                //Secure = true,
                 //SameSite = SameSiteMode.Strict,
                 SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddMinutes(int.Parse(_configuration["JwtSettings:AccessTokenExpiration"]!))
@@ -159,7 +160,7 @@ namespace ResumeBuilder.Api.Authentication
             Response.Cookies.Append(_configuration["JwtSettings:AccessTokenCookieName"]!, string.Empty, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                //Secure = true,
                 //SameSite = SameSiteMode.Strict,
                 SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddMinutes(-1)
@@ -167,7 +168,7 @@ namespace ResumeBuilder.Api.Authentication
             Response.Cookies.Append(_configuration["JwtSettings:RefreshTokenCookieName"]!, string.Empty, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                //Secure = true,
                 //SameSite = SameSiteMode.Strict,
                 SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddMinutes(-1)
