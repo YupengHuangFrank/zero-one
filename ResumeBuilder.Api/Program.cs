@@ -11,10 +11,6 @@ using Microsoft.OpenApi.Models;
 using ResumeBuilder.Infrastructure.Repositories.Resumes;
 using ResumeBuilder.Infrastructure.Repositories.Resumes.Models;
 using System.Security.Cryptography;
-using Microsoft.IdentityModel.Logging;
-using System.Web;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Net.Http.Headers;
 
 [ExcludeFromCodeCoverage]
@@ -115,6 +111,15 @@ public class Program
         );
         builder.Services.AddApplication();
         builder.Services.AddInfrastructure();
+        var MyAllowSpecificOrigins = "_MyAllowSubdomainPolicy";
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy(name: MyAllowSpecificOrigins,
+                policy =>
+                {
+                    policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                });
+        });
         builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
         ConfigureMongoDb(builder.Services, config);
 
@@ -139,6 +144,8 @@ public class Program
         app.UseAuthorization();
 
         app.MapControllers();
+
+        app.UseCors(MyAllowSpecificOrigins);
 
         // This will be added back once we get the ValidTypes thing working
         //IdentityModelEventSource.ShowPII = true;
